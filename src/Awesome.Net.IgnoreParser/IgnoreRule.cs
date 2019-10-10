@@ -53,7 +53,7 @@ namespace Awesome.Net.IgnoreParser
         /// </summary>
         public IgnoreRule(string originalPattern, IgnoreOptions options = null, string basePath = "/", int? lineNumber = null)
         {
-            if(originalPattern.IsNullOrWhiteSpace())
+            if (originalPattern.IsNullOrWhiteSpace())
             {
                 throw new ArgumentNullException(nameof(originalPattern));
             }
@@ -68,7 +68,7 @@ namespace Awesome.Net.IgnoreParser
             LineNumber = lineNumber;
 
             var globOptions = GlobOptions.Default;
-            if(!IgnoreOptions.CaseSensitive)
+            if (!IgnoreOptions.CaseSensitive)
             {
                 _stringComparison = StringComparison.OrdinalIgnoreCase;
                 globOptions.Evaluation.CaseInsensitive = true;
@@ -99,7 +99,7 @@ namespace Awesome.Net.IgnoreParser
         /// </summary>
         public bool IsMatch(string fullPath)
         {
-            if(fullPath.IsNullOrWhiteSpace())
+            if (fullPath.IsNullOrWhiteSpace())
             {
                 throw new ArgumentNullException(nameof(fullPath));
             }
@@ -108,21 +108,21 @@ namespace Awesome.Net.IgnoreParser
                 .RemovePreFix(_stringComparison, BasePath)
                 .TrimEnd('/');
 
-            if(path.IsNullOrEmpty())
+            if (path.IsNullOrEmpty())
             {
                 return false;
             }
 
             // 如果 OriginalPattern 是以反斜杠(/)开头（PatternMeanings.StartsWithOfPath），
             // 意味着要匹配的路径必须跟第一个通配符之前的字符串匹配
-            if(_meanings.HasFlag(PatternMeanings.StartsWithOfPath))
+            if (_meanings.HasFlag(PatternMeanings.StartsWithOfPath))
             {
                 var firstWildcardIndex = _analyzedPattern.IndexOfAny(_globWildcards);
-                var prePattern = firstWildcardIndex < 0
+                var prePattern = firstWildcardIndex != -1
                     ? _analyzedPattern.Left(firstWildcardIndex)
                     : _analyzedPattern;
 
-                if(!path.StartsWith(prePattern, _stringComparison))
+                if (!path.StartsWith(prePattern, _stringComparison))
                 {
                     return false;
                 }
@@ -133,7 +133,7 @@ namespace Awesome.Net.IgnoreParser
             // 如果 _analyzedPattern 不再包含任何斜杠，意味着它可以匹配任何路径段
             // 如：'*.jpg' 可以匹配 'a.jpg', 'a/b.jpg', 'a/b/c.jpg'
             // 所以，path 中的每个斜杠前的字符串都应该尝试匹配一下
-            if(!_analyzedPattern.Contains("/") && path.Contains("/"))
+            if (!_analyzedPattern.Contains("/") && path.Contains("/"))
             {
                 return path.Split('/').Any(segment => _glob.IsMatch(segment));
             }
@@ -149,7 +149,7 @@ namespace Awesome.Net.IgnoreParser
             _meanings = PatternMeanings.ShellGlob;
 
             // originalPattern 以!开头
-            if(pattern.StartsWith("!"))
+            if (pattern.StartsWith("!"))
             {
                 Negation = true;
                 _meanings |= PatternMeanings.Negation;
@@ -157,14 +157,14 @@ namespace Awesome.Net.IgnoreParser
             }
 
             // originalPattern 以/开头
-            if(pattern.StartsWith("/"))
+            if (pattern.StartsWith("/"))
             {
                 _meanings |= PatternMeanings.StartsWithOfPath;
                 pattern = pattern.TrimStart('/');
             }
 
             // originalPattern 以/结尾
-            if(pattern.EndsWith("/"))
+            if (pattern.EndsWith("/"))
             {
                 _meanings |= PatternMeanings.Directory;
                 pattern = pattern.TrimEnd('/');
