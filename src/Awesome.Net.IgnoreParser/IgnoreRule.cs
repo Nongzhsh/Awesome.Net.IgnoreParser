@@ -17,7 +17,7 @@ namespace Awesome.Net.IgnoreParser
     /// </summary>
     public class IgnoreRule
     {
-        private char[] _globWildcards = { '*', '[', '?' };
+        private readonly char[] _globWildcards = { '*', '[', '?' };
         private readonly StringComparison _stringComparison = StringComparison.Ordinal;
         private readonly Glob _glob;
         private readonly string _analyzedPattern;

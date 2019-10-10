@@ -14,28 +14,45 @@ namespace Awesome.Net.IgnoreParser
     {
         private readonly List<IgnoreRule> _rules = new List<IgnoreRule>();
 
-        //靠后的规则优先级比较高，所以要 Reverse
+        //靠后的规则优先级比较高，所以要 Reverse 反转一下
         private IEnumerable<IgnoreRule> UniqueRules => _rules.DistinctBy(x => x.OriginalPattern).Reverse().ToList();
 
+        /// <summary>
+        /// 当前文件中定义的全部忽略规则
+        /// </summary>
         public ReadOnlyCollection<IgnoreRule> Rules => _rules.AsReadOnly();
 
         private string _filePath;
+
+        /// <summary>
+        /// 文件路径
+        /// </summary>
         public string FilePath => _filePath.IsNullOrWhiteSpace()
             ? string.Empty
             : _filePath.NormalizedPath();
 
+        /// <summary>
+        /// 当前.gitignore 文件所处的文件夹路径
+        /// </summary>
         public string BasePath => Path.GetDirectoryName(FilePath).NormalizedPath();
 
         private IgnoreFile()
         {
         }
 
+        
+        /// <summary>
+        /// ctor
+        /// </summary>
         public IgnoreFile(IEnumerable<string> rules, string filePath = null, IgnoreOptions options = null)
         {
             _filePath = filePath;
             AddRules(rules, options);
         }
 
+        /// <summary>
+        /// ctor
+        /// </summary>
         public IgnoreFile(string filePath, IgnoreOptions options = null)
         {
             _filePath = filePath;
@@ -50,11 +67,21 @@ namespace Awesome.Net.IgnoreParser
             AddRules(new[] { rule }, options);
         }
 
+        /// <summary>
+        /// 根据.gitignore 文件路径添加忽略规则
+        /// </summary>
+        /// <param name="ignoreFilePath"></param>
+        /// <param name="options"></param>
         public void AddRules(string ignoreFilePath, IgnoreOptions options = null)
         {
             AddRules(File.ReadAllLines(ignoreFilePath), options);
         }
 
+        /// <summary>
+        /// 添加多个忽略规则
+        /// </summary>
+        /// <param name="rules"></param>
+        /// <param name="options"></param>
         public void AddRules(IEnumerable<string> rules, IgnoreOptions options = null)
         {
             var ruleLines = rules.Select((pattern, index) => new
@@ -69,16 +96,34 @@ namespace Awesome.Net.IgnoreParser
             _rules.AddRange(ruleList);
         }
 
+        /// <summary>
+        /// 判断是否忽略
+        /// </summary>
+        /// <param name="file"></param>
+        /// <param name="ignoredAction"></param>
+        /// <returns></returns>
         public bool IsIgnore(FileInfo file, Action<IgnoredDetails> ignoredAction = null)
         {
             return IsIgnore(file.FullName, ignoredAction);
         }
 
+        /// <summary>
+        /// 判断是否忽略
+        /// </summary>
+        /// <param name="directory"></param>
+        /// <param name="ignoredAction"></param>
+        /// <returns></returns>
         public bool IsIgnore(DirectoryInfo directory, Action<IgnoredDetails> ignoredAction = null)
         {
             return IsIgnore(directory.FullName, ignoredAction);
         }
 
+        /// <summary>
+        /// 判断是否忽略
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="ignoredAction"></param>
+        /// <returns></returns>
         public bool IsIgnore(string path, Action<IgnoredDetails> ignoredAction = null)
         {
             path = path.NormalizedPath();
@@ -92,6 +137,11 @@ namespace Awesome.Net.IgnoreParser
             return IsPathIgnore(path, ignoredAction);
         }
 
+        /// <summary>
+        /// 克隆
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <returns></returns>
         public IgnoreFile Clone(string filePath = null)
         {
             var clone = new IgnoreFile()
@@ -103,11 +153,16 @@ namespace Awesome.Net.IgnoreParser
             return clone;
         }
 
+        /// <summary>
+        /// 移除规则
+        /// </summary>
+        /// <param name="rule"></param>
         public void RemoveRule(string rule)
         {
             _rules.RemoveAll(r => r.OriginalPattern == rule.Trim());
         }
 
+        /// <inheritdoc />
         public override string ToString()
         {
             return FilePath ?? base.ToString();

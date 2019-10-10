@@ -22,6 +22,12 @@ namespace Awesome.Net.IgnoreParser
         /// </summary>
         public IgnoreRule Rule { get; }
 
+        /// <summary>
+        /// ctor
+        /// </summary>
+        /// <param name="matchedPath"></param>
+        /// <param name="ignoreFile"></param>
+        /// <param name="rule"></param>
         public IgnoredDetails(string matchedPath, IgnoreFile ignoreFile, IgnoreRule rule)
         {
             MatchedPath = matchedPath;
@@ -29,6 +35,7 @@ namespace Awesome.Net.IgnoreParser
             Rule = rule;
         }
 
+        /// <inheritdoc />
         public override string ToString()
         {
             var newLine = Environment.NewLine;
